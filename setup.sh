@@ -96,55 +96,49 @@ network_setting()
     $(echo -e "\t${iflist[@]}")
     "
 
-    for if in "${iflist}"
+    for if in "${iflist[@]}"
     do
-        while true
-        do
-            question 'input' "Do you setup the '${if}' NIC?" 'Y' 'y' 'yes' 'n' 'no' -i -l
-            case "${input}" in
-                n*)
-                    break
+        question 'input' "Do you setup the '${if}' NIC?" 'Y' 'y' 'yes' 'n' 'no' -i -l
+        case "${input}" in
+            n*)
+                ;;
+            y*)
+                question 'nettype' 'Please select type' 'D' 'd' 'dhcp' 's' 'static' -i -l
+                case "${nettype}" in
+                    s*)
+                        local ip="static"
+                        question 'addr' 'Please input IP Address' -r
+                        question 'mask' 'Please input Subnet Mask' '24' -r
+                        question 'gateway' 'Please input Gateway Address' -r
+                        question 'dns' 'Please input DNS Address' -r
                     ;;
-                y*)
-                    while true
-                    do
-                        question 'nettype' 'Please select type' 'D' 'd' 'dhcp' 's' 'static' -i -l
-                        case "${nettype}" in
-                            s*)
-                                local ip="static"
-                                question 'addr' 'Please input IP Address' -r
-                                question 'mask' 'Please input Subnet Mask' '24' -r
-                                question 'gateway' 'Please input Gateway Address' -r
-                                question 'dns' 'Please input DNS Address' -r
-                                break
-                            ;;
-                            d*)
-                                local ip="dhcp"
-                                break
-                            ;;
-                        esac
-                    done
-                    question 'desc' 'Please input Description' -r
-                    cat <<CONF > /etc/netctl/${if}
+                    d*)
+                        local ip="dhcp"
+                    ;;
+                esac
+
+                question 'desc' 'Please input Description' -r
+                cat <<CONF > /etc/netctl/${if}
 Description='${desc}'
 Interface=${if}
 Connection=ethernet
 CONF
-                    [ "${ip}" = 'static' ] && \
-                        cat <<CONF >> /etc/netctl/${if}
+                [ "${ip}" = 'static' ] && \
+                    cat <<CONF >> /etc/netctl/${if}
 IP=${ip}
 $([ "${addr}" ] && echo "Address=('${addr}/${mask}')" || echo "Address=()")
 Gateway='${gateway}'
 DNS=('${dns}')
 CONF
-                    question is_start "Do you start ${if} network?" 'Y' 'y' 'yes' 'n' 'no' -i -l
-                    [[ ${is_start} =~ ^y ]] && netctl start "${if}"
+                question is_start "Do you start ${if} network?" 'Y' 'y' 'yes' 'n' 'no' -i -l
+                [[ ${is_start} =~ ^y ]] && netctl $(netctl status ${if} >/dev/null 2>&1 && echo restart || echo start) ${if}
+
+                [ "$(netctl is-enabled ${if})" != 'enabled' ] && {
                     question is_start "Do you register ${if} network to auto start?" 'Y' 'y' 'yes' 'n' 'no' -i -l
                     [[ ${is_start} =~ ^y ]] && netctl enable "${if}"
-                    break
-                    ;;
-            esac
-        done
+                }
+                ;;
+        esac
     done
 }
 
@@ -155,7 +149,7 @@ local_setting()
 
     cat <<EOF > /etc/profile.d/alias.sh
 alias 'll=ls -l --color'
-alias 'vim=vi'
+alias 'vi=vim'
 alias 'tmux=tmux -2'
 EOF
 }
@@ -201,6 +195,9 @@ cat <<TABLE_SH > ${file}
 lan_nic=${lannic}
 wan_nic=${wannic}
 
+TABLE_SH
+
+cat <<'TABLE_SH' >> ${file}
 iptables -F
 iptables -t nat -F
 
@@ -209,7 +206,7 @@ iptables -P OUTPUT ACCEPT
 iptables -P FORWARD DROP
 
 ### get data
-lan=$( ip -o -4 a s dev ${lannic} | awk 'BEGIN{FS=" "} {print $4}' )
+lan=$( ip -o -4 a s dev ${lan_nic} | awk 'BEGIN{FS=" "} {print $4}' )
 lanaddr=${lan%/*}
 lanmask=${lan#*/}
 lannet=$(
@@ -222,7 +219,7 @@ lannet=$(
     done
 )
 
-wan=$( ip -o -4 a s dev ${wannic} | awk 'BEGIN{FS=" "} {print $4}' )
+wan=$( ip -o -4 a s dev ${wan_nic} | awk 'BEGIN{FS=" "} {print $4}' )
 wanaddr=${lan%/*}
 wanmask=${lan#*/}
 wannet=$(
@@ -240,15 +237,15 @@ vpn_dist=10.0.0.0/8
 ### filter
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -s 127.0.0.0/8 -j ACCEPT
-iptables -A INPUT -i ${lannic} -j ACCEPT
+iptables -A INPUT -i ${lan_nic} -j ACCEPT
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 iptables -A FORWARD -s ${lannet}/${lanmask} -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 
 ### NAT
-iptabls -A POSTROUTING -s ${lannet}/${lanmask} -d ${vpn_dist} -o docker0 -j MASQUERADE
-iptabls -A POSTROUTING -s ${lannet}/${lanmask} -o eno16777736 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s ${lannet}/${lanmask} -d ${vpn_dist} -o docker0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s ${lannet}/${lanmask} -o eno16777736 -j MASQUERADE
 
 
 ### system setting
@@ -274,7 +271,7 @@ virtualbox_efi_setting()
 {
     msg "##### virtualbox with efi setting"
 
-    mkdir /boot/efi/EFI/boot
+    mkdir -p /boot/efi/EFI/boot
     echo 'fs0:\EFI\grub\grubx64.efi' > /boot/efi/EFI/boot/startup.nsh
 }
 
@@ -284,9 +281,10 @@ auth_system_setting()
     msg "##### auth system setting"
 }
 
-#virtualbox_efi_setting
-#local_setting
-#network_setting
+virtualbox_efi_setting
+local_setting
 iptables_setting
-#vpn_setting
+network_setting
+install_apps
+vpn_setting
 #auth_system_setting
