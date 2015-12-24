@@ -255,6 +255,15 @@ TABLE_SH
 
     chmod +x ${file}
     ${file}
+
+    cat <<EOF > /etc/sysctl.d/30-ipforward.conf
+net.ipv4.ip_forward=1
+net.ipv6.conf.default.forwarding=1
+net.ipv6.conf.all.forwarding=1
+EOF
+
+    sysctl -p /etc/sysctl.d/30-ipforward.conf
+
 }
 
 ### install apps
@@ -286,5 +295,5 @@ local_setting
 iptables_setting
 network_setting
 install_apps
-vpn_setting
 #auth_system_setting
+vpn_setting
