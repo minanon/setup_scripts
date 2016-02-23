@@ -31,17 +31,18 @@ update_git_repos()
 }
 
 usage_exit(){
-    echo "Usage: ${0} [-t <install target path>][-f : force install when git is existed][-g : only install with git]"
+    echo "Usage: ${0} [-t <install target path>] [-f : force install when git is existed] [-g : only install with git] [-l install required library with package admin tool]"
     exit 1
 }
 
 # params variables
 force_install_without_git=false
 git_only=false
+install_lib=false
 rbenv_root_str=""
 
 ### params
-while getopts t:fg opt
+while getopts t:fgl opt
 do
     case $opt in
         t)
@@ -51,7 +52,10 @@ do
             force_install_without_git=true
             ;;
         g)
-            git_only=false
+            git_only=true
+            ;;
+        l)
+            install_lib=true
             ;;
         \?|h)
             usage_exit
@@ -124,9 +128,9 @@ RBENV_ROOT=${rbenv_root_str}
     && eval "\$(rbenv init -)"
 RB_ENV
 
-type yum 1>/dev/null 2>&1 \
+${install_lib} && type yum 1>/dev/null 2>&1 \
     && yum install -y gcc make openssl-devel readline-devel zlib-devel \
-    || echo 'Warning: Please install "gcc, make, openssl library, readline library, zlib library" for build ruby'
+    || echo 'Please install "gcc, make, openssl library, readline library, zlib library" for build ruby'
 
 cat <<MSG
 1. Please set rbenv environment.
