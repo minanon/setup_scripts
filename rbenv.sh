@@ -24,7 +24,7 @@ update_git_repos()
         local git_cmd="git --git-dir=${path}/.git --work-tree=${path}"
         local branch=$( ${git_cmd} branch --contains=HEAD )
         ${git_cmd} remote update
-        ${git_cmd} merge ${branch#* }
+        ${git_cmd} merge origin/${branch#* }
     else
         git clone "${url}" "${path}"
     fi
@@ -129,8 +129,8 @@ RBENV_ROOT=${rbenv_root_str}
 RB_ENV
 
 ${install_lib} && type yum 1>/dev/null 2>&1 \
-    && yum install -y gcc make openssl-devel readline-devel zlib-devel \
-    || echo 'Please install "gcc, make, openssl library, readline library, zlib library" for build ruby'
+    && yum install -y gcc make openssl-devel readline-devel zlib-devel bzip2 \
+    || echo 'Please install "gcc, make, openssl library, readline library, zlib library, bzip2 library" for build ruby'
 
 cat <<MSG
 1. Please set rbenv environment.
