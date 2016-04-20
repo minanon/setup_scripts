@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Please install libz and libncurse for development
+# Please install zlib and libncurse for development
 
 app_root=${HOME}/.apps
 tmp=${HOME}/.tmp
@@ -11,15 +11,18 @@ set -eu
 chk_cmd()
 {
     local cmd=${1}
-    type ${cmd} >/dev/null 2>&1 || echo "${cmd} command is not found."
-    return $?
+    type ${cmd} >/dev/null 2>&1 || {
+        local result=$?
+        echo "${cmd} command is not found."
+        return ${result}
+    }
 }
 chk_cmd curl
 chk_cmd make
 chk_cmd gcc
 chk_cmd tar
 chk_cmd bzip2
-chk_cmd tcl
+chk_cmd tclsh
 chk_cmd msgfmt
 perl -M'ExtUtils::MakeMaker' -e '' > /dev/null 2>&1 || { echo 'perl ExtUtils::MakeMaker is not found.'  ; return 1 ; }
 
