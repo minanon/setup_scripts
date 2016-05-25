@@ -5,6 +5,15 @@
 app_root=${HOME}/.apps
 tmp=${HOME}/.tmp
 
+# versions
+curl_version=7.49.0
+git_version=2.8.3
+zsh_version=5.2
+libevent_version=2.0.22
+tmux_version=2.2
+vim_version=7.4
+
+
 set -eu
 
 # check cmd
@@ -57,7 +66,7 @@ install_curl()
     echo 'Install curl'
     local curl_share=${app_root}/share/curl/
     local ca_file=${curl_share}/ca-bundle.crt
-    cd "$(dl_dir 'https://curl.haxx.se/download/curl-7.48.0.tar.gz')"
+    cd "$(dl_dir "https://curl.haxx.se/download/curl-${curl_version}.tar.gz")"
     ${base_conf} --with-ca-bundle=${ca_file}
     make && make install
 
@@ -70,7 +79,7 @@ install_git()
 {
     chk_installed git && return 0
     echo 'Install git'
-    cd "$(dl_dir 'https://www.kernel.org/pub/software/scm/git/git-2.8.1.tar.gz')"
+    cd "$(dl_dir "https://www.kernel.org/pub/software/scm/git/git-${git_version}.tar.gz")"
     ${base_conf} --with-curl=${app_root}
     make && make install
 }
@@ -79,7 +88,7 @@ install_zsh()
 {
     chk_installed zsh && return 0
     echo 'Install zsh'
-    cd "$(dl_dir 'http://iweb.dl.sourceforge.net/project/zsh/zsh/5.2/zsh-5.2.tar.gz')"
+    cd "$(dl_dir "http://iweb.dl.sourceforge.net/project/zsh/zsh/${zsh_version}/zsh-${zsh_version}.tar.gz")"
     ${base_conf}
     make && make install
 }
@@ -88,7 +97,7 @@ install_libevent()
 {
     chk_installed '' libevent && return 0
     echo 'Install libevent'
-    cd "$(dl_dir 'https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz')"
+    cd "$(dl_dir "https://github.com/libevent/libevent/releases/download/release-${libevent_version}-stable/libevent-${libevent_version}-stable.tar.gz")"
     ${base_conf}
     make && make install
 }
@@ -96,7 +105,7 @@ install_libevent()
 install_tmux()
 {
     chk_installed tmux && return 0
-    cd "$(dl_dir 'https://github.com/tmux/tmux/releases/download/2.1/tmux-2.1.tar.gz')"
+    cd "$(dl_dir "https://github.com/tmux/tmux/releases/download/${tmux_version}/tmux-${tmux_version}.tar.gz")"
     echo 'Install tmux'
     LIBEVENT_LIBS="${app_root}/lib" LIBEVENT_CFLAGS="-I/home/ymaeda/.apps/include" ${base_conf}
     make && make install
@@ -105,7 +114,7 @@ install_tmux()
 install_vim()
 {
     chk_installed vim && return 0
-    cd "$(dl_dir 'ftp://ftp.ca.vim.org/pub/vim/unix/vim-7.4.tar.bz2')"
+    cd "$(dl_dir "ftp://ftp.ca.vim.org/pub/vim/unix/vim-${vim_version}.tar.bz2")"
     echo 'Install vim'
     ${base_conf} --enable-multibyte  --with-features=huge
     make && make install
