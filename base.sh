@@ -102,7 +102,7 @@ install_tmux()
     chk_installed tmux && return 0
     cd "$(dl_dir "https://github.com/tmux/tmux/releases/download/${tmux_version}/tmux-${tmux_version}.tar.gz")"
     echo 'Install tmux'
-    LIBEVENT_LIBS="${app_root}/lib" LIBEVENT_CFLAGS="-I${app_root}/include" ${base_conf}
+    LIBEVENT_LIBS="-L${app_root}/lib -levent" LIBEVENT_CFLAGS="-I${app_root}/include" ${base_conf}
     make && make install
 }
 
