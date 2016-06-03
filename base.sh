@@ -84,7 +84,7 @@ install_zsh()
     chk_installed zsh && return 0
     echo 'Install zsh'
     cd "$(dl_dir "http://iweb.dl.sourceforge.net/project/zsh/zsh/${zsh_version}/zsh-${zsh_version}.tar.gz")"
-    ${base_conf}
+    ${base_conf} --with-tcsetpgrp
     make && make install
 }
 
