@@ -1,8 +1,8 @@
 # Please install zlib and libncurse for development
 
 # versions
-curl_version=7.49.0
-git_version=2.8.3
+curl_version=7.49.1
+git_version=2.9.0
 zsh_version=5.2
 libevent_version=2.0.22
 tmux_version=2.2
@@ -83,7 +83,7 @@ install_zsh()
 {
     chk_installed zsh && return 0
     echo 'Install zsh'
-    cd "$(dl_dir "http://iweb.dl.sourceforge.net/project/zsh/zsh/${zsh_version}/zsh-${zsh_version}.tar.gz")"
+    cd "$(dl_dir "http://tenet.dl.sourceforge.net/project/zsh/zsh/${zsh_version}/zsh-${zsh_version}.tar.gz")"
     ${base_conf} --with-tcsetpgrp
     make && make install
 }
