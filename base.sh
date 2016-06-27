@@ -77,6 +77,7 @@ install_git()
     cd "$(dl_dir "https://www.kernel.org/pub/software/scm/git/git-${git_version}.tar.gz")"
     ${base_conf} --with-curl=${app_root}
     make && make install
+    cp -r contrib $(find ${app_root} -path '*/share/git' -o -path '*/share/git-core' | head -n1)
 }
 
 install_zsh()
