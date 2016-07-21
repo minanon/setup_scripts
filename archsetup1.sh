@@ -17,5 +17,5 @@ sed -i -e 's/^/#/' /etc/pacman.d/mirrorlist
 sed -i -e '/\.jp/s/^#//' /etc/pacman.d/mirrorlist
 pacstrap /mnt base vim grub dosfstools efibootmgr openssh
 genfstab -U /mnt >> /mnt/etc/fstab
-arch-chroot /mnt
 echo '/dev/sda3 swap swap defaults 0 0' >> /mnt/etc/fstab
+#arch-chroot /mnt
