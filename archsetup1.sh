@@ -18,4 +18,8 @@ sed -i -e '/\.jp/s/^#//' /etc/pacman.d/mirrorlist
 pacstrap /mnt base vim grub dosfstools efibootmgr openssh
 genfstab -U /mnt >> /mnt/etc/fstab
 echo '/dev/sda3 swap swap defaults 0 0' >> /mnt/etc/fstab
-#arch-chroot /mnt
+arch-chroot /mnt
+
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub --boot-directory=/boot/efi/EFI --recheck --debug
+sed -i -e 's/GRUB_TIMEOUT.*/GRUB_TIMEOUT=0/' /etc/default/grub
+grub-mkconfig -o /boot/efi/EFI/grub/grub.cfg
