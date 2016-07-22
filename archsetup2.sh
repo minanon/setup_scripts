@@ -1,1 +1,1 @@
-echo '\EFI\grub\grubx64.efi' > /boot/efi/startup.nsh
+echo '\EFI\grub\grubx64.efi' > /mnt/boot/efi/startup.nsh
