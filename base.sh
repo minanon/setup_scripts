@@ -6,7 +6,7 @@ git_version=2.9.0
 zsh_version=5.2
 libevent_version=2.0.22
 tmux_version=2.2
-vim_version=7.4
+vim_version=8.0
 
 
 set -eu
